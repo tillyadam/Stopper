@@ -107,7 +107,7 @@ public class StopperUI extends JFrame implements ActionListener {
                     hoursToString = String.format("%02d", hours);
 
                     label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + milisecondsToString);
-                } else if ((button_reszidoReset.getText().equals("Részidő")) && (!label_time.getText().equals("00:00:00"))) {
+                } else if ((button_reszidoReset.getText().equals("Részidő")) && (!label_time.getText().equals("00:00:00:000"))) {
                     label_reszido.setText(label_reszido.getText() + hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + miliseconds + "  ");
                 }
             }
