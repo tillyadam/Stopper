@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.Timer;
@@ -19,11 +20,13 @@ public class StopperUI extends JFrame implements ActionListener {
     int hours;
     int minutes;
     int seconds;
+    int miliseconds;
     String hoursToString = String.format("%02d", hours);
     String minutesToString = String.format("%02d", minutes);
     String secondsToString = String.format("%02d", seconds);
-    LocalDateTime startTime;
-    Duration elapsed;
+    String milisecondsToString = String.format("%03d", miliseconds);
+    LocalTime startTime;
+    Duration elapsed, stopDuration;
 
     public StopperUI() {
         init();
@@ -37,7 +40,7 @@ public class StopperUI extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         mainPanel = (JPanel) (this.getContentPane());
         this.setLayout(null);
-        startTime = LocalDateTime.now();
+        stopDuration = Duration.ZERO;
 
         button_startStop = new JButton("Start");
         button_startStop.setBounds(20, 20, 125, 30);
@@ -50,26 +53,33 @@ public class StopperUI extends JFrame implements ActionListener {
                 if (button_startStop.getText().equals("Start")) {
                     button_startStop.setText("Stop");
                     button_reszidoReset.setText("Részidő");
+                    startTime=LocalTime.now();
 
                     task = new TimerTask() {
                         @Override
                         public void run() {
-                            seconds++;
-                            secondsToString = String.format("%02d", seconds % 60);
-                            minutes = seconds / 60;
-                            minutesToString = String.format("%02d", minutes % 60);
-                            hours = seconds / 3600;
-                            hoursToString = String.format("%02d", hours % 24);
-                            label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString);
+                            elapsed = Duration.between(startTime, LocalTime.now());
+                            elapsed = elapsed.plus(stopDuration);
+                            hours = elapsed.toHoursPart();
+                            minutes = elapsed.toMinutesPart();
+                            seconds = elapsed.toSecondsPart();
+                            miliseconds = elapsed.toMillisPart();
+                            milisecondsToString = String.format("%03d", miliseconds);
+                            secondsToString = String.format("%02d", seconds);
+                            minutesToString = String.format("%02d", minutes);
+                            hoursToString = String.format("%02d", hours);
+                            label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + milisecondsToString);
 
                         }
                     };
-                    stopper.schedule(task, 0, 1000);
+                    stopper.schedule(task, 0, 1);
                 } else if (button_startStop.getText().equals("Stop")) {
                     button_startStop.setText("Start");
                     button_reszidoReset.setText("Reset");
-
                     task.cancel();
+
+                    Duration duration = Duration.between(startTime, LocalTime.now());
+                    stopDuration = stopDuration.plus(duration);
                 }
 
 
@@ -86,28 +96,25 @@ public class StopperUI extends JFrame implements ActionListener {
                     button_reszidoReset.setText("Részidő");
                     label_reszido.setText("");
 
+                    miliseconds = 0;
                     seconds = 0;
                     minutes = 0;
                     hours = 0;
 
+                    milisecondsToString = String.format("%03d", miliseconds);
                     secondsToString = String.format("%02d", seconds);
-                    minutes = seconds / 60;
                     minutesToString = String.format("%02d", minutes);
-                    hours = seconds / 3600;
                     hoursToString = String.format("%02d", hours);
 
-                    label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString);
+                    label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + milisecondsToString);
                 } else if ((button_reszidoReset.getText().equals("Részidő")) && (!label_time.getText().equals("00:00:00"))) {
-//                    elapsed = Duration.between(startTime,LocalDateTime.now());
-//                    label_time.setText(String.valueOf(elapsed));
-//                    reszidoLista.add(elapsed);
-                    label_reszido.setText(label_reszido.getText() + hoursToString + ":" + minutesToString + ":" + secondsToString + "  ");
+                    label_reszido.setText(label_reszido.getText() + hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + miliseconds + "  ");
                 }
             }
         });
 
 
-        label_time = new JLabel(hoursToString + ":" + minutesToString + ":" + secondsToString, SwingConstants.HORIZONTAL);
+        label_time = new JLabel(hoursToString + ":" + minutesToString + ":" + secondsToString + ":" + milisecondsToString, SwingConstants.HORIZONTAL);
         label_time.setBounds(200, 30, 350, 60);
         label_time.setFont(new Font("Courier new", Font.ITALIC, 30));
 
