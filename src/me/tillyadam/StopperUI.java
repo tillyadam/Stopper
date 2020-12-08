@@ -18,14 +18,13 @@ public class StopperUI extends JFrame implements ActionListener {
     JButton button_startStop, button_reszidoReset;
     JLabel label_time;
     Timer stopper;
+    TimerTask task;
     int hours;
     int minutes;
     int seconds;
-    int miliseconds;
-    String hoursToString=String.format("%02d",hours);
-    String minutesToString=String.format("%02d",minutes);
-    String secondsToString=String.format("%02d",seconds);
-    String milisecondsToString=String.format("%02d",miliseconds);
+    String hoursToString = String.format("%02d", hours);
+    String minutesToString = String.format("%02d", minutes);
+    String secondsToString = String.format("%02d", seconds);
     LocalDateTime startTime = LocalDateTime.now();
     Duration elapsed;
     List<Time> reszidoLista;
@@ -49,6 +48,32 @@ public class StopperUI extends JFrame implements ActionListener {
         button_startStop.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                stopper = new Timer();
+
+                if (button_startStop.getText().equals("Start")) {
+                    button_startStop.setText("Stop");
+
+                    task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            seconds++;
+                            secondsToString = String.format("%02d", seconds % 60);
+                            minutes = seconds / 60;
+                            minutesToString = String.format("%02d", minutes % 60);
+                            hours = seconds / 3600;
+                            hoursToString = String.format("%02d", hours % 24);
+                            label_time.setText(hoursToString + ":" + minutesToString + ":" + secondsToString);
+
+                        }
+                    };
+                    stopper.schedule(task, 0, 1000);
+                }
+
+                else if (button_startStop.getText().equals("Stop")) {
+                    button_startStop.setText("Start");
+
+                    task.cancel();
+                }
 
 
             }
@@ -59,7 +84,7 @@ public class StopperUI extends JFrame implements ActionListener {
         button_reszidoReset.setFont(new Font("Courier new", Font.PLAIN, 20));
 
 
-        label_time = new JLabel(hoursToString+":"+minutesToString+":"+secondsToString+":"+milisecondsToString, SwingConstants.CENTER);
+        label_time = new JLabel(hoursToString + ":" + minutesToString + ":" + secondsToString, SwingConstants.CENTER);
         label_time.setBounds(200, 30, 350, 60);
         label_time.setFont(new Font("Courier new", Font.ITALIC, 30));
 
@@ -69,18 +94,6 @@ public class StopperUI extends JFrame implements ActionListener {
         mainPanel.add(label_time);
 
         this.setVisible(true);
-    }
-
-    private void start(){
-
-    }
-
-    private void stop(){
-
-    }
-
-    private void reset(){
-
     }
 
 
